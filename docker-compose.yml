@@ -1,0 +1,33 @@
+version: "3.8"
+services:
+  backend1:
+    container_name: "backend_1"
+    build:
+      context: .
+      dockerfile: "./src/backend/Dockerfile"
+    environment:
+      - "BACKEND_NAME=backend_1"
+
+  backend2:
+    container_name: "backend_2"
+    build:
+      context: .
+      dockerfile: "./src/backend/Dockerfile"
+    environment:
+      - "BACKEND_NAME=backend_2"
+
+  backend3:
+    container_name: "backend_3"
+    build:
+      context: .
+      dockerfile: "./src/backend/Dockerfile"
+    environment:
+      - "BACKEND_NAME=backend_3"
+
+  loadbalancer:
+    container_name: "loadbalancer"
+    build:
+      context: .
+      dockerfile: "./src/loadbalancer/Dockerfile"
+    ports:
+      - "8080:8080"
