@@ -1,7 +1,9 @@
 package strategy
 
 import (
+	"encoding/json"
 	"loadBalancer/backend"
+	"log"
 	"net"
 	"net/http"
 	"net/url"
@@ -26,10 +28,48 @@ type loadBalancer interface {
 	setBackends([]*backend.Backend)
 }
 
+func MarkBackendStateus(u *url.URL, status bool, lb loadBalancer) {
+	for _, b := range lb.getBackends() {
+		if b.URL.String() == u.String() {
+			b.SetAlive(status)
+			break
+		}
+	}
+}
+
+func BackendStatusHandler(lb loadBalancer) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
+		response := []*struct {
+			URL   string `json:"url"`
+			Alive bool `json:"alive"`
+		}{}
+		for _, b := range lb.getBackends() {
+			response = append(response, &struct {
+        URL   string `json:"url"`
+        Alive bool `json:"alive"`
+			}{
+				URL:   b.URL.String(),
+				Alive: b.IsAlive(),
+			})
+		}
+
+    responseJson, err := json.Marshal(response)
+    if err != nil {
+      http.Error(w, "Error creating health json", http.StatusInternalServerError)
+    }
+
+    w.Write(responseJson)
+	}
+}
+
 func HealthCheck(lb loadBalancer) {
 	for _, b := range lb.getBackends() {
 		alive := isBackendAlive(b.URL)
 		b.SetAlive(alive)
+
+    log.Printf("Backend %s is alive %t", b.URL.String(), alive)
 	}
 }
 

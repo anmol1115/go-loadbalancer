@@ -1,8 +1,6 @@
 package backend
 
 import (
-	"fmt"
-	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"sync"
@@ -29,12 +27,7 @@ func (b *Backend) IsAlive() bool {
 	return alive
 }
 
-func CreateBackend(u url.URL) *Backend {
-	proxy := httputil.NewSingleHostReverseProxy(&u)
-	proxy.ErrorHandler = func(w http.ResponseWriter, r *http.Request, e error) {
-		fmt.Println("The error is", e.Error())
-	}
-
+func CreateBackend(u url.URL, proxy *httputil.ReverseProxy) *Backend {
 	return &Backend{
 		URL:          &u,
 		alive:        true,
