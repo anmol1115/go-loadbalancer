@@ -39,7 +39,10 @@ func handleError(e error) {
 }
 
 func main() {
-	config := config.LoadConfig("path")
+	config, err := config.LoadConfig("./config.yaml")
+  if err != nil {
+    handleError(err)
+  }
 	loadBalancer := strategy.GetLoadBalancer(config.GetLoadBalancer())
 
 	for _, server := range config.GetBackendServer() {

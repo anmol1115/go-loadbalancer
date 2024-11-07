@@ -1,0 +1,6 @@
+port: 8080
+mode: "RoundRobin"
+servers:
+  - url: "http://backend1:8080"
+  - url: "http://backend2:8080"
+  - url: "http://backend3:8080"
