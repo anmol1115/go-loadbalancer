@@ -11,6 +11,7 @@ type Backend struct {
 	alive        bool
 	mux          sync.RWMutex
 	ReverseProxy *httputil.ReverseProxy
+	weight       int
 }
 
 func (b *Backend) SetAlive(alive bool) {
@@ -27,10 +28,19 @@ func (b *Backend) IsAlive() bool {
 	return alive
 }
 
-func CreateBackend(u url.URL, proxy *httputil.ReverseProxy) *Backend {
+func (b *Backend) GetWeight() int {
+  b.mux.RLock()
+  wt := b.weight
+  b.mux.RUnlock()
+
+  return wt
+}
+
+func CreateBackend(u url.URL, proxy *httputil.ReverseProxy, weight int) *Backend {
 	return &Backend{
 		URL:          &u,
 		alive:        true,
 		ReverseProxy: proxy,
+		weight:       weight,
 	}
 }

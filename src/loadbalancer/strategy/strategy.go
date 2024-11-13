@@ -101,6 +101,8 @@ func GetLoadBalancer(balancer string) loadBalancer {
 	switch balancer {
 	case "RoundRobin":
 		return &RoundRobin{}
+  case "WeightedRoundRobin":
+    return &WeightedRoundRobin{}
 	default:
 		return nil
 	}

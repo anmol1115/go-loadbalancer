@@ -45,7 +45,7 @@ func main() {
   }
 	loadBalancer := strategy.GetLoadBalancer(config.GetLoadBalancer())
 
-	for _, server := range config.GetBackendServer() {
+	for server, weight := range config.GetBackendServer() {
 		serverURL, err := url.Parse(server)
 		if err != nil {
 			handleError(err)
@@ -73,7 +73,7 @@ func main() {
 			strategy.Serve(loadBalancer)(w, r.WithContext(ctx))
 		}
 
-		strategy.AddBackends(loadBalancer, backend.CreateBackend(*serverURL, proxy))
+		strategy.AddBackends(loadBalancer, backend.CreateBackend(*serverURL, proxy, weight))
 	}
 
 	go func() {

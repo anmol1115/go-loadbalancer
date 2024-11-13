@@ -11,31 +11,47 @@ type Config struct {
 	Port    int    `yaml:"port"`
 	Mode    string `yaml:"mode"`
 	Servers []struct {
-		URL string `yaml:"url"`
+		URL    string `yaml:"url"`
+		Weight *int   `yaml:"weight,omitempty"`
 	} `yaml:"servers"`
 }
 
 func LoadConfig(path string) (*Config, error) {
-  data, err := os.ReadFile(path)
-  if err != nil {
-    return nil, fmt.Errorf("Error opening file: %w", err)
-  }
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("Error opening file: %w", err)
+	}
 
-  var config Config
-  if err := yaml.Unmarshal(data, &config); err != nil {
-    return nil, fmt.Errorf("Error unmarshaling the yaml: %w", err)
-  }
+	var config Config
+	if err := yaml.Unmarshal(data, &config); err != nil {
+		return nil, fmt.Errorf("Error unmarshaling the yaml: %w", err)
+	}
 
-  return &config, nil
+	return &config, nil
 }
 
-func (c *Config) GetBackendServer() []string {
-  var servers []string
-  for _, s := range c.Servers {
-    servers = append(servers, s.URL)
-  }
+func (c *Config) GetBackendServer() map[string]int {
+	servers := make(map[string]int)
 
-  return servers
+	for _, server := range c.Servers {
+		switch c.Mode {
+		case "RoundRobin":
+			servers[server.URL] = 1
+
+		case "WeightedRoundRobin":
+			wt := 1
+			if server.Weight != nil {
+				wt = *server.Weight
+				if wt == 0 {
+					wt = 1
+				}
+			}
+			servers[server.URL] = wt
+
+		default:
+		}
+	}
+	return servers
 }
 
 func (c *Config) GetLoadBalancer() string {
@@ -43,5 +59,5 @@ func (c *Config) GetLoadBalancer() string {
 }
 
 func (c *Config) GetServerPort() string {
-  return fmt.Sprintf(":%d", c.Port)
+	return fmt.Sprintf(":%d", c.Port)
 }
