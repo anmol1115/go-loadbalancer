@@ -32,26 +32,26 @@ func LoadConfig(path string) (*Config, error) {
 
 func (c *Config) GetBackendServer() map[string]int {
 	servers := make(map[string]int)
+	
+  for _, server := range c.Servers {
+    switch c.Mode {
+    case "RoundRobin", "Random":
+      servers[server.URL] = 1
 
-	for _, server := range c.Servers {
-		switch c.Mode {
-		case "RoundRobin":
-			servers[server.URL] = 1
+    case "WeightedRoundRobin":
+      wt := 1
+      if server.Weight != nil {
+        wt = *server.Weight
+        if wt == 0 {
+          wt = 1
+        }
+      }
+      servers[server.URL] = wt
 
-		case "WeightedRoundRobin":
-			wt := 1
-			if server.Weight != nil {
-				wt = *server.Weight
-				if wt == 0 {
-					wt = 1
-				}
-			}
-			servers[server.URL] = wt
-
-		default:
-		}
-	}
-	return servers
+    default:
+  }
+  }
+  return servers
 }
 
 func (c *Config) GetLoadBalancer() string {

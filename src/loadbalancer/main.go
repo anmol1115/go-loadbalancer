@@ -89,6 +89,6 @@ func main() {
 	http.HandleFunc("/", strategy.Serve(loadBalancer))
 	http.HandleFunc("/backendstatus", strategy.BackendStatusHandler(loadBalancer))
 	if err := http.ListenAndServe(config.GetServerPort(), nil); err != nil {
-		log.Fatal(err)
+    handleError(err)
 	}
 }

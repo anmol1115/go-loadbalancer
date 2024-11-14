@@ -1,8 +1,6 @@
 port: 8080
-mode: "WeightedRoundRobin"
+mode: "Random"
 servers:
   - url: "http://backend1:8080"
-    weight: 2
   - url: "http://backend2:8080"
-    weight: 2
   - url: "http://backend3:8080"
